@@ -101,9 +101,11 @@ exports.tags = catchAsync(async (req, res, next) => {
   let tags = await Journal.distinct("tags")
   // tags = ["tag1, tag2, tag3", "tag4, tag5"]
   tags = tags.map(tag => tag.split(', '))
-  // tags is a 2D array
-  // tags = [["tag1", "tag2", "tag3"], ["tag4, tag5"]]
-  // alternate solution - tags = tags.flat(1) ES2019 syntax
+  /*
+    tags is a 2D array
+    tags = [["tag1", "tag2", "tag3"], ["tag4, tag5"]]
+    alternate solution - tags = tags.flat(1) ES2019 syntax
+  */
   tags = [].concat.apply([], tags)
 
   const max = 9

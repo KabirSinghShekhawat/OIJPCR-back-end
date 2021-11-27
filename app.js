@@ -22,15 +22,20 @@ process.on('uncaughtException', err => {
     unhandledExceptionListener('UNHANDLED EXCEPTION', err)
 })
 
-const whitelist = ['https://oijpcr.org', 'https://oijpcr-front-end.pages.dev/']
+const whitelist = [
+    'https://oijpcr.org',
+    'https://oijpcr-front-end.pages.dev',
+    'http://localhost:3000',
+]
 
-const corsOptions = {
-    origin: function (origin, callback) {
-        if (whitelist.indexOf(origin) !== -1 || !origin) {
-            return callback(null, true)
-        }
-        callback(new AppError("Blocked by CORS", 403))
-    }
+const corsOptionsDelegate = function (req, callback) {
+    let corsOptions = {
+        credentials: true,
+        origin: false,
+    };
+
+    if (whitelist.indexOf(req.header('Origin')) !== -1) corsOptions.origin = true
+    callback(null, corsOptions)
 }
 
 app.use(
@@ -40,10 +45,7 @@ app.use(
 )
 
 // CORS
-app.use(cors({
-    credentials: true,
-    origin: corsOptions
-}))
+app.use(cors(corsOptionsDelegate));
 
 const limiter = rateLimit({
     windowMs: 60 * 60 * 1000,
@@ -85,7 +87,6 @@ mongoose.connect(mongoConnectionString, mongoOptions)
 
 
 app.use(function (req, res, next) {
-    res.setHeader('Access-Control-Allow-Origin', whitelist);
     res.header('Access-Control-Allow-Credentials', 'true');
     res.header('Access-Control-Allow-Headers',
         'Origin, X-Requested-With, X-PINGOTHER,Content-Type, Accept, Authorization'
