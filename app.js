@@ -19,11 +19,12 @@ const adminRoute = require('./routes/admin')
 const editorRoute = require('./routes/editor')
 const volumeRoute = require('./routes/volume')
 const unhandledExceptionListener = require('./utils/unhandledExceptionListener')
-require('dotenv').config({path: path.join(__dirname, '/.env')});
+require('dotenv').config({ path: path.join(__dirname, '/.env') });
 
 process.on('uncaughtException', err => {
     unhandledExceptionListener('UNHANDLED EXCEPTION', err)
 })
+
 
 let mongoConnectionString, whitelist
 
@@ -36,6 +37,7 @@ if (process.env.NODE_ENV === 'dev') {
     mongoConnectionString = process.env.MONGO_URI
     whitelist = process.env.WHITELIST
 }
+
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -62,8 +64,9 @@ const limiter = rateLimit({
 app.use('*', limiter)
 app.use(method_override('_method'))
 app.use(cookieParser())
-app.use(express.urlencoded({limit: '5mb', extended: true}))
-app.use(express.json({limit: '5mb'}))
+app.use(express.urlencoded({ limit: '5mb', extended: true }))
+app.use(express.json({ limit: '5mb' }))
+
 
 const mongoOptions = {
     useNewUrlParser: true,
