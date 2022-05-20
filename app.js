@@ -16,13 +16,15 @@ const adminRoute = require('./routes/admin')
 const editorRoute = require('./routes/editor')
 const volumeRoute = require('./routes/volume')
 const unhandledExceptionListener = require('./utils/unhandledExceptionListener')
-require('dotenv').config({path: path.join(__dirname, '/.env')});
+require('dotenv').config({ path: path.join(__dirname, '/.env') });
 
 process.on('uncaughtException', err => {
     unhandledExceptionListener('UNHANDLED EXCEPTION', err)
 })
 
 const whitelist = 'https://oijpcr.org'
+// const whitelist = 'http://localhost:3000'
+
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -54,17 +56,17 @@ const limiter = rateLimit({
 app.use('*', limiter)
 app.use(method_override('_method'))
 app.use(cookieParser())
-app.use(express.urlencoded({limit: '5mb', extended: true}))
-app.use(express.json({limit: '5mb'}))
+app.use(express.urlencoded({ limit: '5mb', extended: true }))
+app.use(express.json({ limit: '5mb' }))
 
 let mongoConnectionString
 
-if (process.env.NODE_ENV === 'prod') {
-    app.use(morgan('tiny'))
-    mongoConnectionString = process.env.MONGO_URI
-} else {
+if (process.env.NODE_ENV === 'dev') {
     app.use(morgan('dev'))
     mongoConnectionString = 'mongodb://localhost/oijpcr'
+} else {
+    app.use(morgan('tiny'))
+    mongoConnectionString = process.env.MONGO_URI
 }
 
 
@@ -98,21 +100,6 @@ app.use('/journals', journalsRoute)
 app.use('/admin', adminRoute)
 app.use('/volume', volumeRoute)
 app.use('/editor', editorRoute)
-
-// Serve static assets (react) in production
-if (process.env.NODE_ENV === 'prod') {
-    app.use(express.static('client/build'))
-    app.get('*', (req, res) => {
-        res.sendFile(
-            path.resolve(
-                __dirname,
-                'client',
-                'build',
-                'index.html'
-            )
-        )
-    })
-}
 
 // 404 page
 app.get('*', (req, res) => {

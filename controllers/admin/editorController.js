@@ -15,6 +15,7 @@ exports.getJournals = catchAsync(async (req, res, next) => {
 })
 
 // ! change buffer type
+// ! for local testing only
 exports.getImageFile = catchAsync(async (req, res, next) => {
   const { name } = req.params
   // * calculate path of image in ./public/img
@@ -28,7 +29,7 @@ exports.getImageFile = catchAsync(async (req, res, next) => {
   res.end(data)
 })
 
-// * return image URL to client, also available in MongoDB.
+// * return image URL to client, stored in MongoDB.
 exports.uploadImageFile = (req, res) => {
   res.send({
     msg: 'File Uploaded Successfully',
@@ -63,16 +64,6 @@ exports.saveArticle = catchAsync(async (req, res, next) => {
 exports.editArticle = catchAsync(async (req, res, next) => {
   const { id } = req.body
   const {
-          author,
-          title,
-          content,
-          slug,
-          volume,
-          cover,
-          tags,
-          authorPhoto,
-        } = req.body
-  const modifiedArticle = {
     author,
     title,
     content,
@@ -81,7 +72,9 @@ exports.editArticle = catchAsync(async (req, res, next) => {
     cover,
     tags,
     authorPhoto,
-  }
+  } = req.body
+
+  const modifiedArticle = { author, title, content, slug, volume, cover, tags, authorPhoto }
 
   const result = await Journal.findByIdAndUpdate(id, { ...modifiedArticle })
 
@@ -91,23 +84,24 @@ exports.editArticle = catchAsync(async (req, res, next) => {
   res.status(201).send({ status: 'success' })
 })
 
-exports.deleteArticle = catchAsync(async (req, res, next) => {
-  const { id, articleCover, authorPhoto } = req.body
-  // * deleting the fallback image is not a good idea.
-  // * all articles use this image as a fallback
-  if (articleCover !== 'article_cover_fallback')
-    await deleteCoverImage(articleCover, next)
-  // there is no fallback author photo in images
-  // author photo can be safely deleted now
-  await deleteCoverImage(authorPhoto, next)
-  // * After deleting the cover image, article can be safely deleted.
-  const result = await Journal.findByIdAndDelete(id)
+exports.deleteArticle = catchAsync(
+  async (req, res, next) => {
+    const { id, articleCover, authorPhoto } = req.body
+    // * deleting the fallback image is not a good idea.
+    // * all articles use this image as a fallback
+    if (articleCover !== 'article_cover_fallback')
+      await deleteCoverImage(articleCover, next)
+    // * there is no fallback author photo in images
+    // * author photo can be safely deleted now
+    await deleteCoverImage(authorPhoto, next)
+    // * After deleting the cover image, article can be safely deleted.
+    const result = await Journal.findByIdAndDelete(id)
 
-  if (!result)
-    return next(new AppError('Could not delete Article', 400))
+    if (!result)
+      return next(new AppError('Could not delete Article', 400))
 
-  res.status(201).send({ status: 'success' })
-})
+    res.status(201).send({ status: 'success' })
+  })
 
 exports.deleteImage = catchAsync(async (req, res, next) => {
   const { imageName } = req.params

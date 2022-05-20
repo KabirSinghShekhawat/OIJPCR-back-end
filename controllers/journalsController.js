@@ -3,7 +3,12 @@ const AppError = require('../utils/appError')
 const Journal = require('../models/journal')
 const Volume = require('../models/volume')
 
-
+/**
+ * @constructor
+ * @param {request} request request-object
+ * @param {response} response response-object
+ * @param {next} next next-function
+ */
 exports.journals = catchAsync(async (request, response, next) => {
   const journals = await Journal
     .find({})
