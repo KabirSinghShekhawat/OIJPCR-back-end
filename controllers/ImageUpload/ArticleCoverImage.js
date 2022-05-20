@@ -1,6 +1,8 @@
 const multer = require('multer')
 const multerS3 = require('multer-s3')
-const createFileName = require('./utils/createFileName')
+const {
+  createFileName,
+} = require('./utils')
 const { s3, s3bucket } = require('../../config/config')
 
 const multerStorage = multerS3({

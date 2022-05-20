@@ -8,8 +8,8 @@ aws.config.update({
 
 const s3 = new aws.S3();
 
-module.exports={
+module.exports = {
   aws,
   s3,
-  s3bucket: process.env.S3_BUCKET
+  s3bucket: process.env.S3_BUCKET_NAME
 }
