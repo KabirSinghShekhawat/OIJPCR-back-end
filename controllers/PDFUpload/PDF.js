@@ -22,14 +22,14 @@ const multerStorage = multerS3({
 
 // ** filter -> allow files with mimeType: image/* to pass through
 const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith('image')) {
+  if (file.mimetype.startsWith('application/pdf')) {
     cb(null, true)
-  } else cb(new Error('Not an Image'), false)
+  } else cb(new Error('Not a pdf'), false)
 }
 
-const multerImageUpload = multer({
+const multerPDFUpload = multer({
   storage: multerStorage,
   fileFilter: multerFilter,
-}).single('image')
+}).single('pdf')
 
-module.exports = { multerImageUpload }
+module.exports = { multerPDFUpload }
