@@ -40,6 +40,10 @@ const journalSchema = new mongoose.Schema({
       default: ',',
     },
 
+    pdf: {
+        type: String
+    },
+
     cover: {
       type: String,
       default: `${process.env.HOST}editor/images/article_cover_fallback.jpg`,
