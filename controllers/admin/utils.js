@@ -1,9 +1,8 @@
-const catchAsync = require('../../utils/catchAsync')
 const AppError = require('../../utils/appError')
 const { s3, s3bucket } = require('../../config/config')
 
-const deleteCoverImage = (imageName, next) => {
-  const keyName = decodeURI(imageName)
+const deleteFile = (fileName, next) => {
+  const keyName = decodeURI(fileName)
   const params = {
     Bucket: s3bucket,
     Key: keyName
@@ -12,10 +11,10 @@ const deleteCoverImage = (imageName, next) => {
   return new Promise(resolve => {
     s3.deleteObject(params, (error) => {
       if (error) return next(
-        new AppError('Could not delete image: ' + imageName, 404)
+        new AppError(`Could not delete file: ${fileName}`, 404)
       )
 
-      resolve("Delete Image: " + imageName);
+      resolve(`Delete File: ${fileName}`);
     });
   })
 }
@@ -24,4 +23,4 @@ function isDefaultImage(imageName) {
   return imageName === 'article_cover_fallback.jpg'
 }
 
-module.exports = { isDefaultImage, deleteCoverImage }
+module.exports = { isDefaultImage, deleteCoverImage: deleteFile }

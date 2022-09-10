@@ -1,5 +1,8 @@
 const express = require('express')
+require('express-async-errors')
+
 const app = express().disable('x-powered-by')
+
 const cors = require('cors')
 const mongoose = require('mongoose')
 const morgan = require('morgan')
@@ -16,15 +19,23 @@ const adminRoute = require('./routes/admin')
 const editorRoute = require('./routes/editor')
 const volumeRoute = require('./routes/volume')
 const unhandledExceptionListener = require('./utils/unhandledExceptionListener')
-require('dotenv').config({ path: path.join(__dirname, '/.env') });
+require('dotenv').config({path: path.join(__dirname, '/.env')});
 
 process.on('uncaughtException', err => {
     unhandledExceptionListener('UNHANDLED EXCEPTION', err)
 })
 
-const whitelist = 'https://oijpcr.org'
-// const whitelist = 'http://localhost:3000'
+let mongoConnectionString, whitelist
 
+if (process.env.NODE_ENV === 'dev') {
+    app.use(morgan('dev'))
+    mongoConnectionString = 'mongodb://localhost/oijpcr'
+    whitelist = process.env.DEV_WHITELIST
+} else {
+    app.use(morgan('tiny'))
+    mongoConnectionString = process.env.MONGO_URI
+    whitelist = process.env.WHITELIST
+}
 
 const corsOptions = {
     origin: function (origin, callback) {
@@ -35,40 +46,24 @@ const corsOptions = {
     }
 }
 
-app.use(
-    helmet({
-        contentSecurityPolicy: false,
-    }),
-)
+app.use(helmet({
+    contentSecurityPolicy: false,
+}),)
 
 // CORS
 app.use(cors({
-    credentials: true,
-    origin: corsOptions
+    credentials: true, origin: corsOptions
 }))
 
 const limiter = rateLimit({
-    windowMs: 60 * 60 * 1000,
-    max: 1000,
-    message: 'Too many requests, try again later',
+    windowMs: 60 * 60 * 1000, max: 1000, message: 'Too many requests, try again later',
 })
 
 app.use('*', limiter)
 app.use(method_override('_method'))
 app.use(cookieParser())
-app.use(express.urlencoded({ limit: '5mb', extended: true }))
-app.use(express.json({ limit: '5mb' }))
-
-let mongoConnectionString
-
-if (process.env.NODE_ENV === 'dev') {
-    app.use(morgan('dev'))
-    mongoConnectionString = 'mongodb://localhost/oijpcr'
-} else {
-    app.use(morgan('tiny'))
-    mongoConnectionString = process.env.MONGO_URI
-}
-
+app.use(express.urlencoded({limit: '5mb', extended: true}))
+app.use(express.json({limit: '5mb'}))
 
 const mongoOptions = {
     useNewUrlParser: true,
@@ -89,9 +84,7 @@ mongoose.connect(mongoConnectionString, mongoOptions)
 app.use(function (req, res, next) {
     res.setHeader('Access-Control-Allow-Origin', whitelist);
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Headers',
-        'Origin, X-Requested-With, X-PINGOTHER,Content-Type, Accept, Authorization'
-    );
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, X-PINGOTHER,Content-Type, Accept, Authorization');
     next();
 });
 
