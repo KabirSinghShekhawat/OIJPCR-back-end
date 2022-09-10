@@ -3,4 +3,4 @@
 
 ### High Level System Design
 
-![sys design](https://user-images.githubusercontent.com/58564635/189481893-ed59b12e-d7d2-42ef-9c7d-e490e7cb64ba.png)
+![sys design](https://user-images.githubusercontent.com/58564635/189482065-800a3df7-c77c-4473-afed-02039fe8daec.png)
