@@ -32,10 +32,11 @@ exports.getImageFile = async (req, res) => {
 
 // * return image URL to client, stored in MongoDB.
 exports.uploadFile = (req, res) => {
+    const aliasLocationURL = `https://${req.file.location.split("https://s3.ap-south-1.amazonaws.com/")[1]}`
     res.send({
         msg: 'File Uploaded Successfully',
         file: {
-            url: req.file.location,
+            url: aliasLocationURL,
         }
     })
 }
